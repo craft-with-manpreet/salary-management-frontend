@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useEmployees, useDeleteEmployee } from '@/hooks/useEmployees';
 import { Button } from '@/components/ui/button';
@@ -83,23 +83,37 @@ interface SortConfig {
 
 export function EmployeeListPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { canWrite } = useAuth();
   const deleteEmployee = useDeleteEmployee();
 
-  // Search state with debounce
-  const [searchInput, setSearchInput] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  // Search state with debounce (initialized from URL params)
+  const [searchInput, setSearchInput] = useState(() => searchParams.get('search') ?? '');
+  const [debouncedSearch, setDebouncedSearch] = useState(() => searchParams.get('search') ?? '');
 
-  // Filter state
-  const [countryFilter, setCountryFilter] = useState('');
-  const [departmentFilter, setDepartmentFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  // Filter state (initialized from URL params)
+  const [countryFilter, setCountryFilter] = useState(() => searchParams.get('country') ?? '');
+  const [departmentFilter, setDepartmentFilter] = useState(() => searchParams.get('department') ?? '');
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get('status') ?? '');
 
-  // Pagination state
-  const [page, setPage] = useState(1);
+  // Pagination state (initialized from URL params)
+  const [page, setPage] = useState(() => {
+    const p = searchParams.get('page');
+    return p ? parseInt(p, 10) : 1;
+  });
 
-  // Sort state
-  const [sort, setSort] = useState<SortConfig | null>(null);
+  // Sort state (initialized from URL params)
+  const [sort, setSort] = useState<SortConfig | null>(() => {
+    const ordering = searchParams.get('ordering');
+    if (ordering) {
+      const isDesc = ordering.startsWith('-');
+      return {
+        field: isDesc ? ordering.substring(1) : ordering,
+        direction: isDesc ? 'desc' : 'asc',
+      };
+    }
+    return null;
+  });
 
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -118,12 +132,28 @@ export function EmployeeListPage() {
 
   // Debounce search input by 300ms
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchInput);
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+    if (searchInput !== debouncedSearch) {
+      const timer = setTimeout(() => {
+        setDebouncedSearch(searchInput);
+        setPage(1);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [searchInput, debouncedSearch]);
+
+  // Sync state to query params
+  useEffect(() => {
+    const newParams = new URLSearchParams();
+    if (debouncedSearch) newParams.set('search', debouncedSearch);
+    if (countryFilter) newParams.set('country', countryFilter);
+    if (departmentFilter) newParams.set('department', departmentFilter);
+    if (statusFilter) newParams.set('status', statusFilter);
+    if (page > 1) newParams.set('page', page.toString());
+    if (sort) {
+      newParams.set('ordering', sort.direction === 'desc' ? `-${sort.field}` : sort.field);
+    }
+    setSearchParams(newParams, { replace: true });
+  }, [debouncedSearch, countryFilter, departmentFilter, statusFilter, page, sort, setSearchParams]);
 
   // Build query params
   const params: EmployeeListParams = {

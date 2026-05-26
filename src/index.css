@@ -140,6 +140,27 @@
   h1, h2, h3, h4, h5, h6 {
     @apply tracking-tight;
   }
+
+  /* Interactive element cursor styles */
+  button,
+  [role="button"],
+  select,
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  label {
+    cursor: pointer;
+  }
+
+  /* Override for disabled elements */
+  button:disabled,
+  [role="button"]:disabled,
+  select:disabled,
+  input[type="checkbox"]:disabled,
+  input[type="radio"]:disabled,
+  button[disabled] {
+    cursor: not-allowed !important;
+  }
 }
 
 @layer utilities {

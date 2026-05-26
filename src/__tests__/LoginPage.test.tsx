@@ -19,6 +19,8 @@ vi.mock('@/api/client', () => ({
   getRefreshToken: vi.fn(() => null),
   setTokens: vi.fn(),
   clearTokens: vi.fn(),
+  setRestoringSession: vi.fn(),
+  setAccessToken: vi.fn(),
 }));
 
 function createWrapper() {

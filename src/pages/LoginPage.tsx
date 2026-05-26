@@ -101,7 +101,10 @@ export function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                <Label htmlFor="email" className="text-sm font-medium flex items-center gap-0.5">
+                  Email
+                  <span className="text-destructive font-medium" aria-hidden="true">*</span>
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -119,7 +122,10 @@ export function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                <Label htmlFor="password" className="text-sm font-medium flex items-center gap-0.5">
+                  Password
+                  <span className="text-destructive font-medium" aria-hidden="true">*</span>
+                </Label>
                 <Input
                   id="password"
                   type="password"

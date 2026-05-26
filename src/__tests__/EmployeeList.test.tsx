@@ -165,4 +165,32 @@ describe('EmployeeListPage', () => {
     const retryButton = screen.getByRole('button', { name: /retry/i });
     expect(retryButton).toBeInTheDocument();
   });
+
+  it('should initialize filters from URL query parameters', async () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('search', 'Engineering');
+    url.searchParams.set('country', 'USA');
+    url.searchParams.set('status', 'Active');
+    window.history.replaceState({}, '', url.toString());
+
+    mockUseEmployees.mockReturnValue({
+      data: { count: 1, next: null, previous: null, results: [mockEmployees[0]] },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<EmployeeListPage />, { wrapper: createWrapper() });
+
+    expect(mockUseEmployees).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: 'Engineering',
+        country: 'USA',
+        status: 'Active',
+      })
+    );
+
+    // Clean up
+    window.history.replaceState({}, '', '/');
+  });
 });

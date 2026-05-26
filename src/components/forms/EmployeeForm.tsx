@@ -80,6 +80,9 @@ export function EmployeeForm({
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      <p className="text-xs text-muted-foreground/80">
+        Fields marked with <span className="text-destructive font-semibold">*</span> are required.
+      </p>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField
           label="Employee Code"
@@ -207,15 +210,24 @@ export function EmployeeForm({
 function FormField({
   label,
   error,
+  required = true,
   children,
 }: {
   label: string;
   error?: string;
+  required?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label>{label}</Label>
+      <Label className="flex items-center gap-0.5">
+        {label}
+        {required && (
+          <span className="text-destructive font-medium" aria-hidden="true">
+            *
+          </span>
+        )}
+      </Label>
       {children}
       {error && (
         <p className="text-sm text-red-500" role="alert">
